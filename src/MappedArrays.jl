@@ -1,5 +1,7 @@
 module MappedArrays
 
+using Base: @propagate_inbounds
+
 export mappedarray
 
 abstract AbstractMappedArray{T,N} <: AbstractArray{T,N}
@@ -23,7 +25,7 @@ parenttype{T,N,A,F}(::Type{ReadonlyMappedArray{T,N,A,F}}) = A
 parenttype{T,N,A,F,Finv}(::Type{MappedArray{T,N,A,F,Finv}}) = A
 Base.linearindexing{MA<:AbstractMappedArray}(::Type{MA}) = Base.linearindexing(parenttype(MA))
 
-@inline Base.getindex(A::AbstractMappedArray, i::Int...) = A.f(A.data[i...])
-@inline Base.setindex!(A::MappedArray, val, i::Int...) = A.data[i...] = A.finv(val)
+@propagate_inbounds Base.getindex(A::AbstractMappedArray, i::Int...) = A.f(A.data[i...])
+@propagate_inbounds Base.setindex!(A::MappedArray, val, i::Int...) = A.data[i...] = A.finv(val)
 
 end # module
