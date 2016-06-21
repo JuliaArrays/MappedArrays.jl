@@ -5,3 +5,105 @@
 [![Coverage Status](https://coveralls.io/repos/timholy/MappedArrays.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/timholy/MappedArrays.jl?branch=master)
 
 [![codecov.io](http://codecov.io/github/timholy/MappedArrays.jl/coverage.svg?branch=master)](http://codecov.io/github/timholy/MappedArrays.jl?branch=master)
+
+This package implements "lazy" in-place static transformations of
+arrays for the Julia programming language. Explicitly, it provides a
+"view" `M` of an array `A` so that `M[i] = f(A[i])` for a specified
+(but arbitrary) function `f`, without ever having to compute `M`
+explicitly (in the sense of allocating storage for `M`).  The name of
+the package comes from the fact that `M == map(f, A)`.
+
+## Usage
+
+```jl
+julia> using MappedArrays
+
+julia> a = [1,4,9,16]
+4-element Array{Int64,1}:
+  1
+  4
+  9
+ 16
+
+julia> b = mappedarray(a, sqrt)
+4-element MappedArrays.ReadonlyMappedArray{Float64,1,Array{Int64,1},Base.#sqrt}:
+ 1.0
+ 2.0
+ 3.0
+ 4.0
+
+julia> b[3]
+3.0
+
+julia> b[3] = 2
+ERROR: indexed assignment not defined for MappedArrays.ReadonlyMappedArray{Float64,1,Array{Int64,1},Base.#sqrt}
+ in setindex!(::MappedArrays.ReadonlyMappedArray{Float64,1,Array{Int64,1},Base.#sqrt}, ::Int64, ::Int64) at ./abstractarray.jl:781
+ in eval(::Module, ::Any) at ./boot.jl:231
+ in macro expansion at ./REPL.jl:92 [inlined]
+ in (::Base.REPL.##1#2{Base.REPL.REPLBackend})() at ./event.jl:46
+```
+
+You can't **set** values in the array unless you also supply the inverse function:
+
+```
+julia> c = mappedarray(a, sqrt, x->x*x)
+4-element MappedArrays.MappedArray{Float64,1,Array{Int64,1},Base.#sqrt,##1#2}:
+ 1.0
+ 2.0
+ 3.0
+ 4.0
+
+julia> c[3]
+3.0
+
+julia> c[3] = 2
+2
+
+julia> a
+4-element Array{Int64,1}:
+  1
+  4
+  4
+ 16
+```
+
+Naturally, the "backing" array `a` has to be able to represent any value that you set:
+
+```jl
+julia> c[3] = 2.2
+ERROR: InexactError()
+ in setindex!(::MappedArrays.MappedArray{Float64,1,Array{Int64,1},Base.#sqrt,##1#2}, ::Float64, ::Int64) at /home/tim/.julia/v0.5/MappedArrays/src/MappedArrays.jl:27
+ in eval(::Module, ::Any) at ./boot.jl:231
+ in macro expansion at ./REPL.jl:92 [inlined]
+ in (::Base.REPL.##1#2{Base.REPL.REPLBackend})() at ./event.jl:46
+```
+
+because `2.2^2 = 4.84` is not representable as an `Int`. In contrast,
+
+```jl
+julia> a = [1.0, 4.0, 9.0, 16.0]
+4-element Array{Float64,1}:
+  1.0
+  4.0
+  9.0
+ 16.0
+
+julia> c = mappedarray(a, sqrt, x->x*x)
+4-element MappedArrays.MappedArray{Float64,1,Array{Float64,1},Base.#sqrt,##3#4}:
+ 1.0
+ 2.0
+ 3.0
+ 4.0
+
+julia> c[3] = 2.2
+2.2
+
+julia> a
+4-element Array{Float64,1}:
+  1.0
+  4.0
+  4.84
+ 16.0
+```
+
+works without trouble.
