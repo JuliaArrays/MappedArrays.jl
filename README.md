@@ -32,7 +32,11 @@ julia> b = mappedarray(sqrt, a)
 
 julia> b[3]
 3.0
+```
 
+Note that you can't set values in the array:
+
+```jl
 julia> b[3] = 2
 ERROR: indexed assignment not defined for MappedArrays.ReadonlyMappedArray{Float64,1,Array{Int64,1},Base.#sqrt}
  in setindex!(::MappedArrays.ReadonlyMappedArray{Float64,1,Array{Int64,1},Base.#sqrt}, ::Int64, ::Int64) at ./abstractarray.jl:781
@@ -41,8 +45,7 @@ ERROR: indexed assignment not defined for MappedArrays.ReadonlyMappedArray{Float
  in (::Base.REPL.##1#2{Base.REPL.REPLBackend})() at ./event.jl:46
 ```
 
-You can't **set** values in the array unless you also supply the
-inverse function, using `(f, finv)`:
+**unless** you also supply the inverse function, using `mappedarray((f, finv), A)`:
 
 ```
 julia> c = mappedarray((sqrt, x->x*x), a)
