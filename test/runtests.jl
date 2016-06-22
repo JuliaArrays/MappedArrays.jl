@@ -2,14 +2,14 @@ using MappedArrays
 using Base.Test
 
 a = [1,4,9,16]
-b = mappedarray(a, sqrt)
+b = mappedarray(sqrt, a)
 @test eltype(b) == Float64
 @test @inferred(getindex(b, 1)) == 1
 @test b[2] == 2
 @test b[3] == 3
 @test b[4] == 4
 @test_throws ErrorException b[3] = 0
-c = mappedarray(a, sqrt, x->x*x)
+c = mappedarray((sqrt, x->x*x), a)
 @test @inferred(getindex(c, 1)) == 1
 @test c[2] == 2
 @test c[3] == 3

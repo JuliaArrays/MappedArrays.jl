@@ -7,17 +7,20 @@ export mappedarray
 abstract AbstractMappedArray{T,N} <: AbstractArray{T,N}
 
 immutable ReadonlyMappedArray{T,N,A<:AbstractArray,F} <: AbstractMappedArray{T,N}
-    data::A
     f::F
+    data::A
 end
 immutable MappedArray{T,N,A<:AbstractArray,F,Finv} <: AbstractMappedArray{T,N}
-    data::A
     f::F
     finv::Finv
+    data::A
 end
 
-mappedarray{T,N}(data::AbstractArray{T,N}, f) = ReadonlyMappedArray{typeof(f(one(T))),N,typeof(data),typeof(f)}(data, f)
-mappedarray{T,N}(data::AbstractArray{T,N}, f, finv) = MappedArray{typeof(f(one(T))),N,typeof(data),typeof(f),typeof(finv)}(data, f, finv)
+mappedarray{T,N}(f, data::AbstractArray{T,N}) = ReadonlyMappedArray{typeof(f(one(T))),N,typeof(data),typeof(f)}(f, data)
+function mappedarray{T,N}(f_finv::Tuple{Any,Any}, data::AbstractArray{T,N})
+    f, finv = f_finv
+    MappedArray{typeof(f(one(T))),N,typeof(data),typeof(f),typeof(finv)}(f, finv, data)
+end
 
 Base.parent(A::AbstractMappedArray) = A.data
 Base.size(A::AbstractMappedArray) = size(A.data)
