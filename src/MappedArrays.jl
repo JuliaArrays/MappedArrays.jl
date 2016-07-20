@@ -16,7 +16,21 @@ immutable MappedArray{T,N,A<:AbstractArray,F,Finv} <: AbstractMappedArray{T,N}
     data::A
 end
 
+"""
+     mappedarray(f, A)
+
+creates a view of the array `A` that applies `f` to every element of
+`A`. The view is read-only (you can get values but not set them).
+"""
 mappedarray{T,N}(f, data::AbstractArray{T,N}) = ReadonlyMappedArray{typeof(f(one(T))),N,typeof(data),typeof(f)}(f, data)
+
+"""
+    mappedarray((f, finv), A)
+
+creates a view of the array `A` that applies `f` to every element of
+`A`. The inverse function, `finv`, allows one to also set values of
+the view and, correspondingly, the values in `A`.
+"""
 function mappedarray{T,N}(f_finv::Tuple{Any,Any}, data::AbstractArray{T,N})
     f, finv = f_finv
     MappedArray{typeof(f(one(T))),N,typeof(data),typeof(f),typeof(finv)}(f, finv, data)
