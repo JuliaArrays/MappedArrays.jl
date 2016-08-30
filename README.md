@@ -1,8 +1,8 @@
 # MappedArrays
 
-[![Build Status](https://travis-ci.org/timholy/MappedArrays.jl.svg?branch=master)](https://travis-ci.org/timholy/MappedArrays.jl)
+[![Build Status](https://travis-ci.org/JuliaArrays/MappedArrays.jl.svg?branch=master)](https://travis-ci.org/JuliaArrays/MappedArrays.jl)
 
-[![codecov.io](http://codecov.io/github/timholy/MappedArrays.jl/coverage.svg?branch=master)](http://codecov.io/github/timholy/MappedArrays.jl?branch=master)
+[![codecov.io](http://codecov.io/github/JuliaArrays/MappedArrays.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaArrays/MappedArrays.jl?branch=master)
 
 This package implements "lazy" in-place elementwise transformations of
 arrays for the Julia programming language. Explicitly, it provides a
