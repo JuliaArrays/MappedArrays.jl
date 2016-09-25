@@ -2,6 +2,7 @@ using MappedArrays, FixedPointNumbers
 using Base.Test
 
 a = [1,4,9,16]
+s = view(a', 1:1, [1,2,4])
 
 b = mappedarray(sqrt, a)
 @test parent(b) === a
@@ -12,6 +13,10 @@ b = mappedarray(sqrt, a)
 @test b[4] == 4
 @test_throws ErrorException b[3] = 0
 @test isa(eachindex(b), AbstractUnitRange)
+b = mappedarray(sqrt, a')
+@test isa(eachindex(b), AbstractUnitRange)
+b = mappedarray(sqrt, s)
+@test isa(eachindex(b), CartesianRange)
 
 c = mappedarray((sqrt, x->x*x), a)
 @test parent(c) === a
@@ -23,6 +28,10 @@ c[3] = 2
 @test a[3] == 4
 @test_throws InexactError c[3] = 2.2  # because the backing array is Array{Int}
 @test isa(eachindex(c), AbstractUnitRange)
+b = mappedarray(sqrt, a')
+@test isa(eachindex(b), AbstractUnitRange)
+c = mappedarray((sqrt, x->x*x), s)
+@test isa(eachindex(c), CartesianRange)
 
 sb = similar(b)
 @test isa(sb, Array{Float64})
