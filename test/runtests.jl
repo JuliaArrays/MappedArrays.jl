@@ -1,4 +1,4 @@
-using MappedArrays
+using MappedArrays, FixedPointNumbers
 using Base.Test
 
 a = [1,4,9,16]
@@ -27,3 +27,11 @@ c[3] = 2
 sb = similar(b)
 @test isa(sb, Array{Float64})
 @test size(sb) == size(b)
+
+a = [0x01 0x03; 0x02 0x04]
+b = mappedarray((y->UFixed8(y,0),x->x.i), a)
+for i = 1:4
+    @test b[i] == UFixed8(i/255)
+end
+b[2,1] = 10/255
+@test a[2,1] == 0x0a
