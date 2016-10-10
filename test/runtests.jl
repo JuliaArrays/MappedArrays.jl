@@ -44,3 +44,12 @@ for i = 1:4
 end
 b[2,1] = 10/255
 @test a[2,1] == 0x0a
+
+a = [0.1 0.3; 0.2 0.4]
+b = @inferred(of_eltype(UFixed8, a))
+@test b[1,1] === UFixed8(0.1)
+b[2,1] = UFixed8(0.5)
+@test a[2,1] == UFixed8(0.5)
+@test !(b === a)
+b = of_eltype(Float64, a)
+@test b === a
