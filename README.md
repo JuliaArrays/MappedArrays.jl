@@ -138,3 +138,33 @@ julia> b = mappedarray(abs, a)
  0.486558  1.27959   1.59661   1.05867   2.06828
  0.315976  0.188828  0.567672  0.405086  1.06983
 ```
+
+### of_eltype
+
+This package defines a convenience method, `of_eltype`, which
+"lazily-converts" arrays to a specific `eltype`.  (It works simply by
+defining `convert` functions for both `f` and `finv`.)
+
+Using `of_eltype` you can "convert" a series of arrays to a chosen element type:
+
+```julia
+julia> arrays = (rand(2,2), rand(Int,2,2), [0x01 0x03; 0x02 0x04])
+(
+[0.541018 0.223392; 0.341264 0.022014],
+
+[2437062103055434647 4726011606246170825; -4226911569217925847 -8715663020460318733],
+
+UInt8[0x01 0x03; 0x02 0x04])
+
+julia> arraysT = map(A->of_eltype(Float64, A), arrays)
+(
+[0.541018 0.223392; 0.341264 0.022014],
+
+[2.43706e18 4.72601e18; -4.22691e18 -8.71566e18],
+
+[1.0 3.0; 2.0 4.0])
+```
+
+This construct is inferrable (type-stable), so it can be a useful
+means to "coerce" arrays to a common type. This can sometimes solve
+type-stability problems without requiring that one copy the data.

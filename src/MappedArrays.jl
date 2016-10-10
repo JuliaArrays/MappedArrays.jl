@@ -2,7 +2,7 @@ module MappedArrays
 
 using Base: @propagate_inbounds
 
-export mappedarray
+export mappedarray, of_eltype
 
 abstract AbstractMappedArray{T,N} <: AbstractArray{T,N}
 
@@ -35,6 +35,14 @@ function mappedarray{T,N}(f_finv::Tuple{Any,Any}, data::AbstractArray{T,N})
     f, finv = f_finv
     MappedArray{typeof(f(one(T))),N,typeof(data),typeof(f),typeof(finv)}(f, finv, data)
 end
+
+"""
+    of_eltype(T, A)
+
+creates a view of `A` that lazily-converts the element type to `T`.
+"""
+of_eltype{S,T}(::Type{T}, data::AbstractArray{S}) = mappedarray((x->convert(T,x), y->convert(S,y)), data)
+of_eltype{T}(::Type{T}, data::AbstractArray{T}) = data
 
 Base.parent(A::AbstractMappedArray) = A.data
 Base.size(A::AbstractMappedArray) = size(A.data)
