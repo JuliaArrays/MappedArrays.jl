@@ -38,11 +38,13 @@ end
 
 """
     of_eltype(T, A)
+    of_eltype(val::T, A)
 
 creates a view of `A` that lazily-converts the element type to `T`.
 """
 of_eltype{S,T}(::Type{T}, data::AbstractArray{S}) = mappedarray((x->convert(T,x), y->convert(S,y)), data)
 of_eltype{T}(::Type{T}, data::AbstractArray{T}) = data
+of_eltype{S,T}(::T, data::AbstractArray{S}) = of_eltype(T, data)
 
 Base.parent(A::AbstractMappedArray) = A.data
 Base.size(A::AbstractMappedArray) = size(A.data)

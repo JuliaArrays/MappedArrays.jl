@@ -48,8 +48,12 @@ b[2,1] = 10/255
 a = [0.1 0.3; 0.2 0.4]
 b = @inferred(of_eltype(UFixed8, a))
 @test b[1,1] === UFixed8(0.1)
+b = @inferred(of_eltype(zero(UFixed8), a))
+@test b[1,1] === UFixed8(0.1)
 b[2,1] = UFixed8(0.5)
 @test a[2,1] == UFixed8(0.5)
 @test !(b === a)
-b = of_eltype(Float64, a)
+b = @inferred(of_eltype(Float64, a))
+@test b === a
+b = @inferred(of_eltype(0.0, a))
 @test b === a
