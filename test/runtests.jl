@@ -1,4 +1,4 @@
-using MappedArrays, FixedPointNumbers
+using MappedArrays, FixedPointNumbers, OffsetArrays
 using Base.Test
 
 a = [1,4,9,16]
@@ -57,3 +57,11 @@ b = @inferred(of_eltype(Float64, a))
 @test b === a
 b = @inferred(of_eltype(0.0, a))
 @test b === a
+
+# OffsetArrays
+a = OffsetArray(randn(5), -2:2)
+aabs = mappedarray(abs, a)
+@test indices(aabs) == (-2:2,)
+for i = -2:2
+    @test aabs[i] == abs(a[i])
+end

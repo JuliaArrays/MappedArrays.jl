@@ -48,6 +48,7 @@ of_eltype{S,T}(::T, data::AbstractArray{S}) = of_eltype(T, data)
 
 Base.parent(A::AbstractMappedArray) = A.data
 Base.size(A::AbstractMappedArray) = size(A.data)
+Base.indices(A::AbstractMappedArray) = indices(A.data)
 parenttype{T,N,A,F}(::Type{ReadonlyMappedArray{T,N,A,F}}) = A
 parenttype{T,N,A,F,Finv}(::Type{MappedArray{T,N,A,F,Finv}}) = A
 Base.linearindexing{MA<:AbstractMappedArray}(::Type{MA}) = Base.linearindexing(parenttype(MA))
