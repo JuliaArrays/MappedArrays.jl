@@ -1,8 +1,10 @@
+__precompile__()
+
 module MappedArrays
 
 using Base: @propagate_inbounds
 
-export mappedarray, of_eltype
+export AbstractMappedArray, MappedArray, ReadonlyMappedArray, mappedarray, of_eltype
 
 abstract AbstractMappedArray{T,N} <: AbstractArray{T,N}
 
