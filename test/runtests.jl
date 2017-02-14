@@ -38,20 +38,20 @@ sb = similar(b)
 @test size(sb) == size(b)
 
 a = [0x01 0x03; 0x02 0x04]
-b = mappedarray((y->UFixed8(y,0),x->x.i), a)
+b = mappedarray((y->N0f8(y,0),x->x.i), a)
 for i = 1:4
-    @test b[i] == UFixed8(i/255)
+    @test b[i] == N0f8(i/255)
 end
 b[2,1] = 10/255
 @test a[2,1] == 0x0a
 
 a = [0.1 0.3; 0.2 0.4]
-b = @inferred(of_eltype(UFixed8, a))
-@test b[1,1] === UFixed8(0.1)
-b = @inferred(of_eltype(zero(UFixed8), a))
-@test b[1,1] === UFixed8(0.1)
-b[2,1] = UFixed8(0.5)
-@test a[2,1] == UFixed8(0.5)
+b = @inferred(of_eltype(N0f8, a))
+@test b[1,1] === N0f8(0.1)
+b = @inferred(of_eltype(zero(N0f8), a))
+@test b[1,1] === N0f8(0.1)
+b[2,1] = N0f8(0.5)
+@test a[2,1] == N0f8(0.5)
 @test !(b === a)
 b = @inferred(of_eltype(Float64, a))
 @test b === a
