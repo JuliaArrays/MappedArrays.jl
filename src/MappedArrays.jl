@@ -3,10 +3,11 @@ __precompile__()
 module MappedArrays
 
 using Base: @propagate_inbounds
+using Compat
 
 export AbstractMappedArray, MappedArray, ReadonlyMappedArray, mappedarray, of_eltype
 
-abstract AbstractMappedArray{T,N} <: AbstractArray{T,N}
+@compat abstract type AbstractMappedArray{T,N} <: AbstractArray{T,N} end
 
 immutable ReadonlyMappedArray{T,N,A<:AbstractArray,F} <: AbstractMappedArray{T,N}
     f::F
