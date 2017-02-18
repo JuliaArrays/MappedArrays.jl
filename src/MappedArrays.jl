@@ -25,7 +25,7 @@ end
 creates a view of the array `A` that applies `f` to every element of
 `A`. The view is read-only (you can get values but not set them).
 """
-mappedarray{T,N}(f, data::AbstractArray{T,N}) = ReadonlyMappedArray{typeof(f(one(T))),N,typeof(data),typeof(f)}(f, data)
+mappedarray{T,N}(f, data::AbstractArray{T,N}) = ReadonlyMappedArray{typeof(f(testvalue(data))),N,typeof(data),typeof(f)}(f, data)
 
 """
     mappedarray((f, finv), A)
@@ -36,7 +36,7 @@ the view and, correspondingly, the values in `A`.
 """
 function mappedarray{T,N}(f_finv::Tuple{Any,Any}, data::AbstractArray{T,N})
     f, finv = f_finv
-    MappedArray{typeof(f(one(T))),N,typeof(data),typeof(f),typeof(finv)}(f, finv, data)
+    MappedArray{typeof(f(testvalue(data))),N,typeof(data),typeof(f),typeof(finv)}(f, finv, data)
 end
 
 """
@@ -54,10 +54,17 @@ Base.size(A::AbstractMappedArray) = size(A.data)
 Base.indices(A::AbstractMappedArray) = indices(A.data)
 parenttype{T,N,A,F}(::Type{ReadonlyMappedArray{T,N,A,F}}) = A
 parenttype{T,N,A,F,Finv}(::Type{MappedArray{T,N,A,F,Finv}}) = A
-Base.linearindexing{MA<:AbstractMappedArray}(::Type{MA}) = Base.linearindexing(parenttype(MA))
+@compat Base.IndexStyle{MA<:AbstractMappedArray}(::Type{MA}) = IndexStyle(parenttype(MA))
 
 @propagate_inbounds Base.getindex(A::AbstractMappedArray, i::Int...) = A.f(A.data[i...])
 @propagate_inbounds Base.setindex!{T}(A::MappedArray{T}, val::T, i::Int...) = A.data[i...] = A.finv(val)
 @inline Base.setindex!{T}(A::MappedArray{T}, val, i::Int...) = setindex!(A, convert(T, val), i...)
+
+function testvalue(data)
+    if !isempty(data)
+        return first(data)
+    end
+    zero(eltype(data))
+end
 
 end # module
