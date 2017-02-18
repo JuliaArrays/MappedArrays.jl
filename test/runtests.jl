@@ -65,3 +65,10 @@ aabs = mappedarray(abs, a)
 for i = -2:2
     @test aabs[i] == abs(a[i])
 end
+
+# issue #7
+astr = mappedarray(length, ["abc", "onetwothree"])
+@test eltype(astr) == Int
+@test astr == [3, 11]
+a = mappedarray(x->x+0.5, Int[])
+@test eltype(a) == Float64
