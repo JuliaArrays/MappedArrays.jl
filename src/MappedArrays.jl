@@ -62,9 +62,10 @@ parenttype{T,N,A,F,Finv}(::Type{MappedArray{T,N,A,F,Finv}}) = A
 
 function testvalue(data)
     if !isempty(data)
-        return first(data)
-    end
-    zero(eltype(data))
+        first(data)
+    else
+        zero(eltype(data))
+    end::eltype(data)
 end
 
 end # module
