@@ -83,7 +83,10 @@ parenttype(::Type{ReadonlyMappedArray{T,N,A,F}}) where {T,N,A,F} = A
 parenttype(::Type{MappedArray{T,N,A,F,Finv}}) where {T,N,A,F,Finv} = A
 parenttype(::Type{ReadonlyMultiMappedArray{T,N,A,F}}) where {T,N,A,F} = A
 Base.IndexStyle(::Type{MA}) where {MA<:AbstractMappedArray} = IndexStyle(parenttype(MA))
-Base.@pure Base.IndexStyle(::Type{MA}) where {MA<:ReadonlyMultiMappedArray} = _indexstyle(map(IndexStyle, parenttype(MA).parameters)...)
+@inline Base.IndexStyle(M::ReadonlyMultiMappedArray) = IndexStyle(M.data...)
+Base.IndexStyle(::Type{MA}) where {MA<:ReadonlyMultiMappedArray} = _indexstyle(MA)
+Base.@pure _indexstyle(::Type{MA}) where {MA<:ReadonlyMultiMappedArray} =
+    _indexstyle(map(IndexStyle, parenttype(MA).parameters)...)
 _indexstyle(a, b, c...) = _indexstyle(IndexStyle(a, b), c...)
 _indexstyle(a, b) = IndexStyle(a, b)
 
