@@ -1,5 +1,9 @@
-using MappedArrays, FixedPointNumbers, OffsetArrays
+using MappedArrays
 using Base.Test
+
+@test isempty(detect_ambiguities(MappedArrays, Base, Core))
+
+using FixedPointNumbers, OffsetArrays
 
 a = [1,4,9,16]
 s = view(a', 1:1, [1,2,4])
