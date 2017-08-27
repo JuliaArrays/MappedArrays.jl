@@ -77,3 +77,19 @@ a = @inferred(mappedarray(x->x+0.5, Int[]))
 astr = @inferred(mappedarray(uppercase, ["abc", "def"]))
 @test eltype(astr) == String
 @test astr == ["ABC","DEF"]
+
+# multiple arrays
+a = reshape(1:6, 2, 3)
+b = fill(10.0f0, 2, 3)
+M = @inferred(mappedarray(+, a, b))
+@test @inferred(eltype(M)) == Float32
+@test @inferred(IndexStyle(M)) == IndexLinear()
+@test M == a + b
+@test @inferred(M[CartesianIndex(1, 1)]) === 11.0f0
+
+c = view(reshape(1:9, 3, 3), 1:2, :)
+M = @inferred(mappedarray(+, c, b))
+@test @inferred(eltype(M)) == Float32
+@test @inferred(IndexStyle(M)) == IndexCartesian()
+@test M == c + b
+@test @inferred(M[CartesianIndex(1, 1)]) === 11.0f0
