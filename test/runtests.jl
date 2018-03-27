@@ -1,5 +1,6 @@
+using Compat
 using MappedArrays, FixedPointNumbers, OffsetArrays
-using Base.Test
+using Compat.Test
 
 a = [1,4,9,16]
 s = view(a', 1:1, [1,2,4])
@@ -16,7 +17,11 @@ b = @inferred(mappedarray(sqrt, a))
 b = mappedarray(sqrt, a')
 @test isa(eachindex(b), AbstractUnitRange)
 b = mappedarray(sqrt, s)
-@test isa(eachindex(b), CartesianRange)
+@static if VERSION < v"0.7-"
+    @test isa(eachindex(b), CartesianRange)
+else
+    @test isa(eachindex(b), CartesianIndices)
+end
 
 c = @inferred(mappedarray((sqrt, x->x*x), a))
 @test parent(c) === a
@@ -31,7 +36,11 @@ c[3] = 2
 b = @inferred(mappedarray(sqrt, a'))
 @test isa(eachindex(b), AbstractUnitRange)
 c = @inferred(mappedarray((sqrt, x->x*x), s))
-@test isa(eachindex(c), CartesianRange)
+@static if VERSION < v"0.7-"
+    @test isa(eachindex(c), CartesianRange)
+else
+    @test isa(eachindex(c), CartesianIndices)
+end
 
 sb = similar(b)
 @test isa(sb, Array{Float64})
