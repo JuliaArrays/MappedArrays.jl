@@ -1,5 +1,9 @@
-using MappedArrays, FixedPointNumbers, OffsetArrays
+using MappedArrays
 using Base.Test
+
+@test isempty(detect_ambiguities(MappedArrays, Base, Core))
+
+using FixedPointNumbers, OffsetArrays
 
 a = [1,4,9,16]
 s = view(a', 1:1, [1,2,4])
@@ -77,3 +81,26 @@ a = @inferred(mappedarray(x->x+0.5, Int[]))
 astr = @inferred(mappedarray(uppercase, ["abc", "def"]))
 @test eltype(astr) == String
 @test astr == ["ABC","DEF"]
+
+# multiple arrays
+a = reshape(1:6, 2, 3)
+@test @inferred(indices(a)) == (Base.OneTo(2), Base.OneTo(3)) # prevents error on 0.7
+b = fill(10.0f0, 2, 3)
+M = @inferred(mappedarray(+, a, b))
+@test @inferred(eltype(M)) == Float32
+@test @inferred(IndexStyle(M)) == IndexLinear()
+@test @inferred(IndexStyle(typeof(M))) == IndexLinear()
+@test @inferred(indices(M)) === indices(a)
+@test M == a + b
+@test @inferred(M[1]) === 11.0f0
+@test @inferred(M[CartesianIndex(1, 1)]) === 11.0f0
+
+c = view(reshape(1:9, 3, 3), 1:2, :)
+M = @inferred(mappedarray(+, c, b))
+@test @inferred(eltype(M)) == Float32
+@test @inferred(IndexStyle(M)) == IndexCartesian()
+@test @inferred(IndexStyle(typeof(M))) == IndexCartesian()
+@test @inferred(indices(M)) === indices(c)
+@test M == c + b
+@test @inferred(M[1]) === 11.0f0
+@test @inferred(M[CartesianIndex(1, 1)]) === 11.0f0
