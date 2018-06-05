@@ -1,0 +1,9 @@
+authors = ["Rene Donner <code@donner.at>"]
+name = "MappedArrays"
+uuid = "79b7e244-689b-11e8-29d1-63f94bca9ce5"
+version = "0.1.0"
+
+[deps]
+Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
+OffsetArrays = "bf94ceee-689b-11e8-0315-f97f881fb50f"
