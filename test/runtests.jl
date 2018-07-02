@@ -1,5 +1,5 @@
 using MappedArrays
-using Base.Test
+using Test
 
 @test isempty(detect_ambiguities(MappedArrays, Base, Core))
 
@@ -20,7 +20,7 @@ b = @inferred(mappedarray(sqrt, a))
 b = mappedarray(sqrt, a')
 @test isa(eachindex(b), AbstractUnitRange)
 b = mappedarray(sqrt, s)
-@test isa(eachindex(b), CartesianRange)
+@test isa(eachindex(b), CartesianIndices)
 
 c = @inferred(mappedarray((sqrt, x->x*x), a))
 @test parent(c) === a
@@ -35,7 +35,7 @@ c[3] = 2
 b = @inferred(mappedarray(sqrt, a'))
 @test isa(eachindex(b), AbstractUnitRange)
 c = @inferred(mappedarray((sqrt, x->x*x), s))
-@test isa(eachindex(c), CartesianRange)
+@test isa(eachindex(c), CartesianIndices)
 
 sb = similar(b)
 @test isa(sb, Array{Float64})
@@ -65,7 +65,7 @@ b = @inferred(of_eltype(0.0, a))
 # OffsetArrays
 a = OffsetArray(randn(5), -2:2)
 aabs = mappedarray(abs, a)
-@test indices(aabs) == (-2:2,)
+@test axes(aabs) == (-2:2,)
 for i = -2:2
     @test aabs[i] == abs(a[i])
 end
@@ -84,13 +84,13 @@ astr = @inferred(mappedarray(uppercase, ["abc", "def"]))
 
 # multiple arrays
 a = reshape(1:6, 2, 3)
-@test @inferred(indices(a)) == (Base.OneTo(2), Base.OneTo(3)) # prevents error on 0.7
+@test @inferred(axes(a)) == (Base.OneTo(2), Base.OneTo(3)) # prevents error on 0.7
 b = fill(10.0f0, 2, 3)
 M = @inferred(mappedarray(+, a, b))
 @test @inferred(eltype(M)) == Float32
 @test @inferred(IndexStyle(M)) == IndexLinear()
 @test @inferred(IndexStyle(typeof(M))) == IndexLinear()
-@test @inferred(indices(M)) === indices(a)
+@test @inferred(axes(M)) === axes(a)
 @test M == a + b
 @test @inferred(M[1]) === 11.0f0
 @test @inferred(M[CartesianIndex(1, 1)]) === 11.0f0
@@ -100,7 +100,7 @@ M = @inferred(mappedarray(+, c, b))
 @test @inferred(eltype(M)) == Float32
 @test @inferred(IndexStyle(M)) == IndexCartesian()
 @test @inferred(IndexStyle(typeof(M))) == IndexCartesian()
-@test @inferred(indices(M)) === indices(c)
+@test @inferred(axes(M)) === axes(c)
 @test M == c + b
 @test @inferred(M[1]) === 11.0f0
 @test @inferred(M[CartesianIndex(1, 1)]) === 11.0f0

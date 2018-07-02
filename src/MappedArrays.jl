@@ -22,7 +22,7 @@ struct ReadonlyMultiMappedArray{T,N,AAs<:Tuple{Vararg{AbstractArray}},F} <: Abst
     data::AAs
 
     function ReadonlyMultiMappedArray{T,N,AAs,F}(f, data) where {T,N,AAs,F}
-        inds = indices(first(data))
+        inds = axes(first(data))
         checkinds(inds, Base.tail(data)...)
         new(f, data)
     end
@@ -30,8 +30,8 @@ end
 
 # TODO: remove @inline for 0.7
 @inline function checkinds(inds, A, As...)
-    @noinline throw1(i, j) = throw(DimensionMismatch("arrays do not all have the same indices (got $i and $j)"))
-    iA = indices(A)
+    @noinline throw1(i, j) = throw(DimensionMismatch("arrays do not all have the same axes (got $i and $j)"))
+    iA = axes(A)
     iA == inds || throw1(inds, iA)
     checkinds(inds, As...)
 end
@@ -77,8 +77,8 @@ of_eltype(::T, data::AbstractArray{S}) where {S,T} = of_eltype(T, data)
 Base.parent(A::AbstractMappedArray) = A.data
 Base.size(A::AbstractMappedArray) = size(A.data)
 Base.size(A::ReadonlyMultiMappedArray) = size(first(A.data))
-Base.indices(A::AbstractMappedArray) = indices(A.data)
-Base.indices(A::ReadonlyMultiMappedArray) = indices(first(A.data))
+Base.axes(A::AbstractMappedArray) = axes(A.data)
+Base.axes(A::ReadonlyMultiMappedArray) = axes(first(A.data))
 parenttype(::Type{ReadonlyMappedArray{T,N,A,F}}) where {T,N,A,F} = A
 parenttype(::Type{MappedArray{T,N,A,F,Finv}}) where {T,N,A,F,Finv} = A
 parenttype(::Type{ReadonlyMultiMappedArray{T,N,A,F}}) where {T,N,A,F} = A
