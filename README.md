@@ -13,6 +13,8 @@ the package comes from the fact that `M == map(f, A)`.
 
 ## Usage
 
+### Single source arrays
+
 ```jl
 julia> using MappedArrays
 
@@ -137,6 +139,50 @@ julia> b = mappedarray(abs, a)
  0.799232  0.301813  0.457817  0.115742  1.22948
  0.486558  1.27959   1.59661   1.05867   2.06828
  0.315976  0.188828  0.567672  0.405086  1.06983
+```
+
+### Multiple source arrays
+
+Just as `map(f, a, b)` can take multiple containers `a` and `b`, `mappedarray` can too:
+```julia
+julia> a = [0.1 0.2; 0.3 0.4]
+2×2 Array{Float64,2}:
+ 0.1  0.2
+ 0.3  0.4
+
+julia> b = [1 2; 3 4]
+2×2 Array{Int64,2}:
+ 1  2
+ 3  4
+
+julia> c = mappedarray(+, a, b)
+2×2 MappedArrays.ReadonlyMultiMappedArray{Float64,2,Tuple{Array{Float64,2},Array{Int64,2}},typeof(+)}:
+ 1.1  2.2
+ 3.3  4.4
+```
+
+In some cases you can also supply an inverse function:
+```julia
+julia> using ColorTypes
+
+julia> redchan = [0.1 0.2; 0.3 0.4];
+
+julia> greenchan = [0.8 0.75; 0.7 0.65];
+
+julia> bluechan = [0 1; 0 1];
+
+julia> m = mappedarray((RGB{Float64}, c->(red(c), green(c), blue(c))), redchan, greenchan, bluechan)
+2×2 MappedArrays.MultiMappedArray{RGB{Float64},2,Tuple{Array{Float64,2},Array{Float64,2},Array{Int64,2}},DataType,getfield(Main, Symbol("##5#6"))}:
+ RGB{Float64}(0.1,0.8,0.0)  RGB{Float64}(0.2,0.75,1.0)
+ RGB{Float64}(0.3,0.7,0.0)  RGB{Float64}(0.4,0.65,1.0)
+
+ julia> m[1,2] = RGB(0,0,0)
+RGB{N0f8}(0.0,0.0,0.0)
+
+julia> redchan
+2×2 Array{Float64,2}:
+ 0.1  0.0
+ 0.3  0.4
 ```
 
 ### of_eltype
