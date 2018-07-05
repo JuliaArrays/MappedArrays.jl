@@ -28,7 +28,7 @@ end
     intsym = Int == Int64 ? :Int64 : :Int32
     a = [1,4,9,16]
     s = view(a', 1:1, [1,2,4])
-    c = @inferred(mappedarray((sqrt, x->x*x), a))
+    c = @inferred(mappedarray(sqrt, x->x*x, a))
     @test parent(c) === a
     @test @inferred(getindex(c, 1)) == 1
     @test c[2] == 2
@@ -40,7 +40,7 @@ end
     @test isa(eachindex(c), AbstractUnitRange)
     b = @inferred(mappedarray(sqrt, a'))
     @test isa(eachindex(b), AbstractUnitRange)
-    c = @inferred(mappedarray((sqrt, x->x*x), s))
+    c = @inferred(mappedarray(sqrt, x->x*x, s))
     @test isa(eachindex(c), CartesianIndices)
 
     sb = similar(b)
@@ -48,7 +48,7 @@ end
     @test size(sb) == size(b)
 
     a = [0x01 0x03; 0x02 0x04]
-    b = @inferred(mappedarray((y->N0f8(y,0),x->x.i), a))
+    b = @inferred(mappedarray(y->N0f8(y,0), x->x.i, a))
     for i = 1:4
         @test b[i] == N0f8(i/255)
     end
@@ -123,9 +123,9 @@ end
     a = [0.1 0.2; 0.3 0.4]
     b = N0f8[0.6 0.5; 0.4 0.3]
     c = [0 1; 0 1]
-    f_finv = ( (r,g,b)->RGB{N0f8}(r,g,b),
-               c->(red(c), green(c), blue(c)))
-    M = @inferred(mappedarray(f_finv, a, b, c))
+    f = RGB{N0f8}
+    finv = c->(red(c), green(c), blue(c))
+    M = @inferred(mappedarray(f, finv, a, b, c))
     @test @inferred(eltype(M)) == RGB{N0f8}
     @test @inferred(IndexStyle(M)) == IndexLinear()
     @test @inferred(IndexStyle(typeof(M))) == IndexLinear()
@@ -147,7 +147,7 @@ end
     @test b[1,1] === N0f8(0.8)
 
     a = view(reshape(0.1:0.1:0.6, 3, 2), 1:2, 1:2)
-    M = @inferred(mappedarray(f_finv, a, b, c))
+    M = @inferred(mappedarray(f, finv, a, b, c))
     @test @inferred(eltype(M)) == RGB{N0f8}
     @test @inferred(IndexStyle(M)) == IndexCartesian()
     @test @inferred(IndexStyle(typeof(M))) == IndexCartesian()
@@ -156,5 +156,5 @@ end
     @test_throws ErrorException("indexed assignment fails for a reshaped range; consider calling collect") M[1,2] = RGB(0.25, 0.35, 0)
 
     a = reshape(0.1:0.1:0.6, 3, 2)
-    @test_throws DimensionMismatch mappedarray(f_finv, a, b, c)
+    @test_throws DimensionMismatch mappedarray(f, finv, a, b, c)
 end

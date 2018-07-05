@@ -47,10 +47,10 @@ ERROR: indexed assignment not defined for MappedArrays.ReadonlyMappedArray{Float
  in (::Base.REPL.##1#2{Base.REPL.REPLBackend})() at ./event.jl:46
 ```
 
-**unless** you also supply the inverse function, using `mappedarray((f, finv), A)`:
+**unless** you also supply the inverse function, using `mappedarray(f, finv, A)`:
 
 ```
-julia> c = mappedarray((sqrt, x->x*x), a)
+julia> c = mappedarray(sqrt, x->x*x, a)
 4-element MappedArrays.MappedArray{Float64,1,Array{Int64,1},Base.#sqrt,##1#2}:
  1.0
  2.0
@@ -92,7 +92,7 @@ julia> a = [1.0, 4.0, 9.0, 16.0]
   9.0
  16.0
 
-julia> c = mappedarray((sqrt, x->x*x), a)
+julia> c = mappedarray(sqrt, x->x*x, a)
 4-element MappedArrays.MappedArray{Float64,1,Array{Float64,1},Base.#sqrt,##3#4}:
  1.0
  2.0
@@ -161,7 +161,7 @@ julia> c = mappedarray(+, a, b)
  3.3  4.4
 ```
 
-In some cases you can also supply an inverse function:
+In some cases you can also supply an inverse function, which should return a tuple (one value for each input array):
 ```julia
 julia> using ColorTypes
 
@@ -171,7 +171,7 @@ julia> greenchan = [0.8 0.75; 0.7 0.65];
 
 julia> bluechan = [0 1; 0 1];
 
-julia> m = mappedarray((RGB{Float64}, c->(red(c), green(c), blue(c))), redchan, greenchan, bluechan)
+julia> m = mappedarray(RGB{Float64}, c->(red(c), green(c), blue(c)), redchan, greenchan, bluechan)
 2×2 MappedArrays.MultiMappedArray{RGB{Float64},2,Tuple{Array{Float64,2},Array{Float64,2},Array{Int64,2}},DataType,getfield(Main, Symbol("##5#6"))}:
  RGB{Float64}(0.1,0.8,0.0)  RGB{Float64}(0.2,0.75,1.0)
  RGB{Float64}(0.3,0.7,0.0)  RGB{Float64}(0.4,0.65,1.0)

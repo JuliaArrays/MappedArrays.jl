@@ -33,10 +33,9 @@ struct MultiMappedArray{T,N,AAs<:Tuple{Vararg{AbstractArray}},F,Finv} <: Abstrac
     finv::Finv
     data::AAs
 
-    function MultiMappedArray{T,N,AAs,F,Finv}(f_finv::Tuple{F,Finv}, data) where {T,N,AAs,F,Finv}
+    function MultiMappedArray{T,N,AAs,F,Finv}(f::F, finv::Finv, data) where {T,N,AAs,F,Finv}
         inds = axes(first(data))
         checkinds(inds, Base.tail(data)...)
-        f, finv = f_finv
         new(f, finv, data)
     end
 end
@@ -65,14 +64,22 @@ function mappedarray(f, data::AbstractArray)
     ReadonlyMappedArray{T,ndims(data),typeof(data),typeof(f)}(f, data)
 end
 
+function mappedarray(::Type{T}, data::AbstractArray) where T
+    ReadonlyMappedArray{T,ndims(data),typeof(data),Type{T}}(T, data)
+end
+
 function mappedarray(f, data::AbstractArray...)
     T = typeof(f(map(testvalue, data)...))
     ReadonlyMultiMappedArray{T,ndims(first(data)),typeof(data),typeof(f)}(f, data)
 end
 
+function mappedarray(::Type{T}, data::AbstractArray...) where T
+    ReadonlyMultiMappedArray{T,ndims(first(data)),typeof(data),Type{T}}(T, data)
+end
+
 """
-    M = mappedarray((f, finv), A)
-    M = mappedarray((f, finv), A, B, C...)
+    M = mappedarray(f, finv, A)
+    M = mappedarray(f, finv, A, B, C...)
 
 creates a view of the array `A` that applies `f` to every element of
 `A`. The inverse function, `finv`, allows one to also set values of
@@ -80,16 +87,26 @@ the view and, correspondingly, the values in `A`.
 
 When multiple input arrays are supplied, `M[i] = f(A[i], B[i], C[i]...)`.
 """
-function mappedarray(f_finv::Tuple{Any,Any}, data::AbstractArray)
-    f, finv = f_finv
+function mappedarray(f, finv, data::AbstractArray)
     T = typeof(f(testvalue(data)))
     MappedArray{T,ndims(data),typeof(data),typeof(f),typeof(finv)}(f, finv, data)
 end
 
-function mappedarray(f_finv::Tuple{Any,Any}, data::AbstractArray...)
-    f, finv = f_finv
+function mappedarray(f, finv, data::AbstractArray...)
     T = typeof(f(map(testvalue, data)...))
-    MultiMappedArray{T,ndims(first(data)),typeof(data),typeof(f),typeof(finv)}(f_finv, data)
+    MultiMappedArray{T,ndims(first(data)),typeof(data),typeof(f),typeof(finv)}(f, finv, data)
+end
+
+function mappedarray(::Type{T}, finv, data::AbstractArray...) where T
+    MultiMappedArray{T,ndims(first(data)),typeof(data),Type{T},typeof(finv)}(T, finv, data)
+end
+function mappedarray(f, ::Type{Finv}, data::AbstractArray...) where Finv
+    T = typeof(f(map(testvalue, data)...))
+    MultiMappedArray{T,ndims(first(data)),typeof(data),typeof(f),Type{Finv}}(f, Finv, data)
+end
+
+function mappedarray(::Type{T}, ::Type{Finv}, data::AbstractArray...) where {T,Finv}
+    MultiMappedArray{T,ndims(first(data)),typeof(data),Type{T},Type{Finv}}(T, Finv, data)
 end
 
 """
@@ -98,7 +115,7 @@ end
 
 creates a view of `A` that lazily-converts the element type to `T`.
 """
-of_eltype(::Type{T}, data::AbstractArray{S}) where {S,T} = mappedarray((x->convert(T,x), y->convert(S,y)), data)
+of_eltype(::Type{T}, data::AbstractArray{S}) where {S,T} = mappedarray(x->convert(T,x), y->convert(S,y), data)
 of_eltype(::Type{T}, data::AbstractArray{T}) where {T} = data
 of_eltype(::T, data::AbstractArray{S}) where {S,T} = of_eltype(T, data)
 
@@ -145,9 +162,9 @@ end
                                                    i::Vararg{Int,N}) where {T,N}
     A.f(A.data[i...])
 end
-@inline @propagate_inbounds function Base.getindex(M::AbstractMultiMappedArray{T,N},
+@inline @propagate_inbounds function Base.getindex(A::AbstractMultiMappedArray{T,N},
                                                    i::Vararg{Int,N}) where {T,N}
-    M.f(_getindex(CartesianIndex(i), M.data...)...)
+    A.f(_getindex(CartesianIndex(i), A.data...)...)
 end
 
 @inline @propagate_inbounds function Base.setindex!(A::MappedArray{T,N},
@@ -183,5 +200,8 @@ function testvalue(data)
         zero(eltype(data))
     end::eltype(data)
 end
+
+## Deprecations
+@deprecate mappedarray(f_finv::Tuple{Any,Any}, args::AbstractArray...) mappedarray(f_finv[1], f_finv[2], args...)
 
 end # module
