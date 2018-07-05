@@ -201,6 +201,62 @@ function testvalue(data)
     end::eltype(data)
 end
 
+## Display
+
+function Base.showarg(io::IO, A::AbstractMappedArray{T,N}, toplevel=false) where {T,N}
+    print(io, "mappedarray(")
+    func_print(io, A.f, eltypes(A.data))
+    if isa(A, Union{MappedArray,MultiMappedArray})
+        print(io, ", ")
+        func_print(io, A.finv, Tuple{T})
+    end
+    if isa(A, AbstractMultiMappedArray)
+        for a in A.data
+            print(io, ", ")
+            Base.showarg(io, a, false)
+        end
+    else
+        print(io, ", ")
+        Base.showarg(io, A.data, false)
+    end
+    print(io, ')')
+    toplevel && print(io, " with eltype ", T)
+end
+
+function func_print(io, f, types)
+    ft = typeof(f)
+    mt = ft.name.mt
+    name = string(mt.name)
+    if startswith(name, '#')
+        # This is an anonymous function. See if it can be printed nicely
+        lwrds = code_lowered(f, types)
+        if length(lwrds) != 1
+            show(io, f)
+            return nothing
+        end
+        lwrd = lwrds[1]
+        c = lwrd.code
+        if length(c) == 2 && isa(c[2], Expr) && c[2].head == :return
+            # This is a single-line anonymous function, we should handle it
+            s = lwrd.slotnames[2:end]
+            if length(s) == 1
+                print(io, s[1], "->")
+            else
+                print(io, tuple(s...), "->")
+            end
+            reps = ["_"*string(i+1)=>string(s[i]) for i = 1:length(s)]
+            print(io, replace(string(c[1]), reps...))
+        else
+            show(io, f)
+        end
+    else
+        show(io, f)
+    end
+end
+
+eltypes(A::AbstractArray) = Tuple{eltype(A)}
+@Base.pure eltypes(A::Tuple{Vararg{<:AbstractArray}}) = Tuple{(eltype.(A))...}
+
 ## Deprecations
 @deprecate mappedarray(f_finv::Tuple{Any,Any}, args::AbstractArray...) mappedarray(f_finv[1], f_finv[2], args...)
 

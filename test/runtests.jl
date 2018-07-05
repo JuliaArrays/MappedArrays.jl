@@ -158,3 +158,11 @@ end
     a = reshape(0.1:0.1:0.6, 3, 2)
     @test_throws DimensionMismatch mappedarray(f, finv, a, b, c)
 end
+
+@testset "Display" begin
+    a = [1,2,3,4]
+    b = mappedarray(sqrt, a)
+    @test summary(b) == "4-element mappedarray(sqrt, ::Array{Int64,1}) with eltype Float64"
+    c = mappedarray(sqrt, x->x*x, a)
+    @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::Array{Int64,1}) with eltype Float64"
+end
