@@ -1,5 +1,3 @@
-__precompile__()
-
 module MappedArrays
 
 using Base: @propagate_inbounds
