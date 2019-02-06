@@ -136,19 +136,19 @@ _indexstyle(a, b) = IndexStyle(a, b)
 
 
 # IndexLinear implementations
-@inline @propagate_inbounds Base.getindex(A::AbstractMappedArray, i::Int) =
+@propagate_inbounds Base.getindex(A::AbstractMappedArray, i::Int) =
     A.f(A.data[i])
-@inline @propagate_inbounds Base.getindex(M::AbstractMultiMappedArray, i::Int) =
+@propagate_inbounds Base.getindex(M::AbstractMultiMappedArray, i::Int) =
     M.f(_getindex(i, M.data...)...)
 
-@inline @propagate_inbounds function Base.setindex!(A::MappedArray{T},
-                                                    val,
-                                                    i::Int) where {T}
+@propagate_inbounds function Base.setindex!(A::MappedArray{T},
+                                            val,
+                                            i::Int) where {T}
     A.data[i] = A.finv(convert(T, val)::T)
 end
-@inline @propagate_inbounds function Base.setindex!(A::MultiMappedArray{T},
-                                                    val,
-                                                    i::Int) where {T}
+@propagate_inbounds function Base.setindex!(A::MultiMappedArray{T},
+                                            val,
+                                            i::Int) where {T}
     vals = A.finv(convert(T, val)::T)
     _setindex!(A.data, vals, i)
     return vals
@@ -156,33 +156,33 @@ end
 
 
 # IndexCartesian implementations
-@inline @propagate_inbounds function Base.getindex(A::AbstractMappedArray{T,N},
-                                                   i::Vararg{Int,N}) where {T,N}
+@propagate_inbounds function Base.getindex(A::AbstractMappedArray{T,N},
+                                           i::Vararg{Int,N}) where {T,N}
     A.f(A.data[i...])
 end
-@inline @propagate_inbounds function Base.getindex(A::AbstractMultiMappedArray{T,N},
-                                                   i::Vararg{Int,N}) where {T,N}
+@propagate_inbounds function Base.getindex(A::AbstractMultiMappedArray{T,N},
+                                           i::Vararg{Int,N}) where {T,N}
     A.f(_getindex(CartesianIndex(i), A.data...)...)
 end
 
-@inline @propagate_inbounds function Base.setindex!(A::MappedArray{T,N},
-                                                    val,
-                                                    i::Vararg{Int,N}) where {T,N}
+@propagate_inbounds function Base.setindex!(A::MappedArray{T,N},
+                                            val,
+                                            i::Vararg{Int,N}) where {T,N}
     A.data[i...] = A.finv(convert(T, val)::T)
 end
-@inline @propagate_inbounds function Base.setindex!(A::MultiMappedArray{T,N},
-                                                    val,
-                                                    i::Vararg{Int,N}) where {T,N}
+@propagate_inbounds function Base.setindex!(A::MultiMappedArray{T,N},
+                                            val,
+                                            i::Vararg{Int,N}) where {T,N}
     vals = A.finv(convert(T, val)::T)
     _setindex!(A.data, vals, i...)
     return vals
 end
 
 
-@inline @propagate_inbounds _getindex(i, A, As...) = (A[i], _getindex(i, As...)...)
+@propagate_inbounds _getindex(i, A, As...) = (A[i], _getindex(i, As...)...)
 _getindex(i) = ()
 
-@inline @propagate_inbounds function _setindex!(as::As, vals::Vs, inds::Vararg{Int,N}) where {As,Vs,N}
+@propagate_inbounds function _setindex!(as::As, vals::Vs, inds::Vararg{Int,N}) where {As,Vs,N}
     a1, atail = as[1], Base.tail(as)
     v1, vtail = vals[1], Base.tail(vals)
     a1[inds...] = v1
