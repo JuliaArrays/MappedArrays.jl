@@ -242,8 +242,11 @@ function func_print(io, f, types)
             else
                 print(io, tuple(s...), "->")
             end
-            reps = ["_"*string(i+1)=>string(s[i]) for i = 1:length(s)]
-            print(io, replace(string(c[1]), reps...))
+            c1 = string(c[1])
+            for i = 1:length(s)
+                c1 = replace(c1, "_"*string(i+1)=>string(s[i]))
+            end
+            print(io, c1)
         else
             show(io, f)
         end
