@@ -165,4 +165,10 @@ end
     @test summary(b) == "4-element mappedarray(sqrt, ::Array{Int64,1}) with eltype Float64"
     c = mappedarray(sqrt, x->x*x, a)
     @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::Array{Int64,1}) with eltype Float64"
+    # issue #26
+    M = @inferred mappedarray((x1,x2)->x1+x2, a, a)
+    io = IOBuffer()
+    show(io, MIME("text/plain"), M)
+    str = String(take!(io))
+    @test occursin("x1 + x2", str)
 end
