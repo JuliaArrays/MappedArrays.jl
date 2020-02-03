@@ -22,6 +22,9 @@ using FixedPointNumbers, OffsetArrays, ColorTypes
     @test isa(eachindex(b), AbstractUnitRange)
     b = mappedarray(sqrt, s)
     @test isa(eachindex(b), CartesianIndices)
+    c = Base.unaliascopy(b)
+    @test c == b
+    @test c !== b
 end
 
 @testset "MappedArray" begin
@@ -43,6 +46,10 @@ end
     c = @inferred(mappedarray(sqrt, x->x*x, s))
     @test isa(eachindex(c), CartesianIndices)
 
+    d = Base.unaliascopy(c)
+    @test c == d
+    @test c !== d
+    
     sb = similar(b)
     @test isa(sb, Array{Float64})
     @test size(sb) == size(b)
@@ -106,6 +113,10 @@ end
     @test M == a + b
     @test @inferred(M[1]) === 11.0f0
     @test @inferred(M[CartesianIndex(1, 1)]) === 11.0f0
+    
+    d = Base.unaliascopy(b)
+    @test d == b
+    @test d !== b
 
     c = view(reshape(1:9, 3, 3), 1:2, :)
     M = @inferred(mappedarray(+, c, b))
@@ -155,6 +166,10 @@ end
     @test M[1,1] === RGB{N0f8}(0.1, 0.8, 0)
     @test_throws ErrorException("indexed assignment fails for a reshaped range; consider calling collect") M[1,2] = RGB(0.25, 0.35, 0)
 
+    d = Base.unaliascopy(M)
+    @test d == M
+    @test d !== M
+    
     a = reshape(0.1:0.1:0.6, 3, 2)
     @test_throws DimensionMismatch mappedarray(f, finv, a, b, c)
 end
