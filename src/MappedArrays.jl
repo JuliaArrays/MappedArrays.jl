@@ -258,6 +258,11 @@ end
 eltypes(A::AbstractArray) = Tuple{eltype(A)}
 @Base.pure eltypes(A::Tuple{Vararg{<:AbstractArray}}) = Tuple{(eltype.(A))...}
 
+Base.unaliascopy(x::ReadonlyMappedArray) = mappedarray(x.f, Base.unaliascopy(x.data))
+Base.unaliascopy(x::MappedArray) = mappedarray(x.f, x.finv, Base.unaliascopy(x.data))
+Base.unaliascopy(x::ReadonlyMultiMappedArray) = mappedarray(x.f, Base.unaliascopy(x.data))
+Base.unaliascopy(x::MultiMappedArray) = mappedarray(x.f, x.finv, Base.unaliascopy(x.data))
+
 ## Deprecations
 @deprecate mappedarray(f_finv::Tuple{Any,Any}, args::AbstractArray...) mappedarray(f_finv[1], f_finv[2], args...)
 
