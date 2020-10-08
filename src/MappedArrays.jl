@@ -234,7 +234,7 @@ function func_print(io, f, types)
         end
         lwrd = lwrds[1]
         c = lwrd.code
-        if length(c) == 2 && isa(c[2], Expr) && c[2].head == :return
+        if length(c) == 2 && ((isa(c[2], Expr) && c[2].head === :return) || (isdefined(Core, :ReturnNode) && isa(c[2], Core.ReturnNode)))
             # This is a single-line anonymous function, we should handle it
             s = lwrd.slotnames[2:end]
             if length(s) == 1
