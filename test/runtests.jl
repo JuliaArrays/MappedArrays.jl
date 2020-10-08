@@ -140,7 +140,12 @@ end
     @test a[1,2] == N0f8(0.25)
     @test b[1,2] == N0f8(0.35)
     @test c[1,2] == 0
-    @test_throws InexactError(intsym, Int, N0f8(0.45)) M[1,2] = RGB(0.25, 0.35, 0.45)
+    try
+        M[1,2] = RGB(0.25, 0.35, 0.45)
+    catch err
+        # Can't use `@test_throws` because is differs by FPN version, and we support multiple versions
+        @test err == InexactError(intsym, Int, N0f8(0.45)) || err == InexactError(:Integer, N0f8, N0f8(0.45))
+    end
     R = reinterpret(N0f8, M)
     @test R == N0f8[0.1 0.25; 0.6 0.35; 0 0; 0.3 0.4; 0.4 0.3; 0 1]
     R[2,1] = 0.8
@@ -162,9 +167,9 @@ end
 @testset "Display" begin
     a = [1,2,3,4]
     b = mappedarray(sqrt, a)
-    @test summary(b) == "4-element mappedarray(sqrt, ::Array{Int64,1}) with eltype Float64"
+    @test summary(b) == "4-element mappedarray(sqrt, ::$(Vector{Int})) with eltype Float64"
     c = mappedarray(sqrt, x->x*x, a)
-    @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::Array{Int64,1}) with eltype Float64"
+    @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::$(Vector{Int})) with eltype Float64"
     # issue #26
     M = @inferred mappedarray((x1,x2)->x1+x2, a, a)
     io = IOBuffer()
