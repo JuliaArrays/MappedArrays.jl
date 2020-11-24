@@ -2,7 +2,7 @@ module MappedArrays
 
 using Base: @propagate_inbounds
 
-export AbstractMappedArray, MappedArray, ReadonlyMappedArray, mappedarray, of_eltype
+export AbstractMappedArray, MappedArray, ReadonlyMappedArray, mappedarray, of_eltype, mappedarrayreduce
 
 abstract type AbstractMappedArray{T,N} <: AbstractArray{T,N} end
 abstract type AbstractMultiMappedArray{T,N} <: AbstractMappedArray{T,N} end
@@ -260,5 +260,26 @@ eltypes(A::AbstractArray) = Tuple{eltype(A)}
 
 ## Deprecations
 @deprecate mappedarray(f_finv::Tuple{Any,Any}, args::AbstractArray...) mappedarray(f_finv[1], f_finv[2], args...)
+
+
+# mapreduce
+
+"""
+    mappedarrayreduce(f, op, A...; kw...)
+
+Perform a "lazy" `mapreduce` without allocating an intermediate array. This might 
+be more performant than a standard `mapreduce`. Functionally this is equivalent to 
+`reduce(op, mappedarray(f, A...); kw...)`.
+
+# Examples
+```jldoctest
+julia> mappedarrayreduce(x -> x^2, +, 1:10) # == 1^2 + 2^2 + 3^2
+385
+```
+"""
+mappedarrayreduce(f, op, A...; kw...) = reduce(op, mappedarray(f, A...); kw...)
+mappedarrayreduce(f, finv::Function, op::Function, A...; kw...) = error(
+    "mappedarrayreduce does not support an inverse function, "*
+    "please use the signature mappedarrayreduce(f, op, A...; kw...)")
 
 end # module

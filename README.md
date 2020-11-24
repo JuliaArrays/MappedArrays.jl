@@ -210,3 +210,16 @@ julia> arraysT = map(A->of_eltype(Float64, A), arrays)
 This construct is inferrable (type-stable), so it can be a useful
 means to "coerce" arrays to a common type. This can sometimes solve
 type-stability problems without requiring that one copy the data.
+
+### mappedarrayreduce
+
+This package provides a "lazy" `mapreduce` operation in the form of the function `mappedarrayreduce`, where the `map` is evaluated as a `MappedArray` and is not materialized. This therefore might be more performant than a standard `mapreduce`.
+
+Note that `mappedarrayreduce` follows the same signature as `mapreduce`, and does not accept an inverse function.
+
+An example of its usage:
+
+```julia
+julia> mappedarrayreduce(x -> x^2, +, 1:3) # == 1^2 + 2^2 + 3^2
+14
+```
