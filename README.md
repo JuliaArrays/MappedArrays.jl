@@ -1,7 +1,6 @@
 # MappedArrays
 
-[![Build Status](https://travis-ci.org/JuliaArrays/MappedArrays.jl.svg?branch=master)](https://travis-ci.org/JuliaArrays/MappedArrays.jl)
-
+[![CI](https://github.com/JuliaArrays/MappedArrays.jl/workflows/CI/badge.svg)](https://github.com/JuliaArrays/MappedArrays.jl/actions?query=workflow%3ACI)
 [![codecov.io](http://codecov.io/github/JuliaArrays/MappedArrays.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaArrays/MappedArrays.jl?branch=master)
 
 This package implements "lazy" in-place elementwise transformations of
