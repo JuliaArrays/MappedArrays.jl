@@ -196,7 +196,7 @@ function testvalue(data)
         first(data)
     else
         zero(eltype(data))
-    end::eltype(data)
+    end
 end
 
 ## Display
