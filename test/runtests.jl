@@ -177,3 +177,40 @@ end
     str = String(take!(io))
     @test occursin("x1 + x2", str)
 end
+
+@testset "eltype (issue #32)" begin
+    # Tests fix for
+    # https://github.com/JuliaArrays/MappedArrays.jl/issues/32#issuecomment-682985419
+    T = Union{Missing, Float32}
+    @test eltype(of_eltype(T, [missing, 3])) == T
+    @test eltype(of_eltype(T, [3, missing])) == T
+    @test eltype(of_eltype(Union{Missing, Float64}, [1, 2])) == Float64
+
+    @test eltype(mappedarray(identity, [1, missing])) == Union{Missing, Int}
+    @test eltype(mappedarray(identity, [missing, 1])) == Union{Missing, Int}
+
+    # ReadonlyMappedArray and MappedArray
+    _zero(x) = x > 0 ? x : 0
+    @test eltype(mappedarray(_zero, [1, 1.0])) == Union{Float64,Int}
+    @test eltype(mappedarray(_zero, [1.0, 1])) == Union{Float64,Int}
+    @test eltype(mappedarray(_zero, [1, 1])) == Int
+
+    @test eltype(mappedarray(_zero, identity, [1, 1.0])) == Union{Float64,Int}
+    @test eltype(mappedarray(_zero, identity, [1.0, 1])) == Union{Float64,Int}
+    @test eltype(mappedarray(_zero, identity, [1, 1])) == Int
+
+    # MultiMappedArray and ReadonlyMultiMappedArray
+    _sum(x, y) = _zero(x) + _zero(y)
+    inferred_type = VERSION >= v"1.6.0-RC1" ? Union{Missing, Float64, Int64} : Any
+    @test eltype(mappedarray(_sum, [1, 1.0], [1.0, missing])) == inferred_type
+    @test eltype(mappedarray(_sum, [1, 1], [2, 2])) == Int
+    @test eltype(mappedarray(_sum, identity, [1, 1.0], [1.0, missing])) == inferred_type
+    @test eltype(mappedarray(_sum, identity, [1, 1], [2, 2])) == Int
+
+    _maybe_int(x) = x > 0 ? x : Int(x)
+    @test eltype(mappedarray(_maybe_int, Float64, [1.0, 1, -1, -1.0])) == Union{Float64, Int64}
+    @test eltype(mappedarray(_maybe_int, Float64, [1.0, -1.0])) == Union{Float64, Int64}
+    @test eltype(mappedarray(_maybe_int, Float64, [1, -1])) == Int64
+    @test eltype(mappedarray(Float64, _maybe_int, [1.0, 1, -1, -1.0])) == Float64
+    @test eltype(mappedarray(Float64, _maybe_int, [1, -1])) == Float64
+end
