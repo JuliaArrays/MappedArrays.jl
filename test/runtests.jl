@@ -201,8 +201,16 @@ end
 
     # MultiMappedArray and ReadonlyMultiMappedArray
     _sum(x, y) = _zero(x) + _zero(y)
-    @test eltype(mappedarray(_sum, [1, 1.0], [1.0, missing])) == Union{Missing, Float64, Int64}
+    inferred_type = VERSION >= v"1.6.0-RC1" ? Union{Missing, Float64, Int64} : Any
+    @test eltype(mappedarray(_sum, [1, 1.0], [1.0, missing])) == inferred_type
     @test eltype(mappedarray(_sum, [1, 1], [2, 2])) == Int
-    @test eltype(mappedarray(_sum, identity, [1, 1.0], [1.0, missing])) == Union{Missing, Float64, Int64}
+    @test eltype(mappedarray(_sum, identity, [1, 1.0], [1.0, missing])) == inferred_type
     @test eltype(mappedarray(_sum, identity, [1, 1], [2, 2])) == Int
+
+    _maybe_int(x) = x > 0 ? x : Int(x)
+    @test eltype(mappedarray(_maybe_int, Float64, [1.0, 1, -1, -1.0])) == Union{Float64, Int64}
+    @test eltype(mappedarray(_maybe_int, Float64, [1.0, -1.0])) == Union{Float64, Int64}
+    @test eltype(mappedarray(_maybe_int, Float64, [1, -1])) == Int64
+    @test eltype(mappedarray(Float64, _maybe_int, [1.0, 1, -1, -1.0])) == Float64
+    @test eltype(mappedarray(Float64, _maybe_int, [1, -1])) == Float64
 end
