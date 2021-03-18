@@ -189,8 +189,7 @@ end
     @test eltype(mappedarray(identity, [1, missing])) == Union{Missing, Int}
     @test eltype(mappedarray(identity, [missing, 1])) == Union{Missing, Int}
 
-    # Based on
-    # https://github.com/JuliaArrays/MappedArrays.jl/pull/34#issuecomment-706265722
+    # ReadonlyMappedArray and MappedArray
     _zero(x) = x > 0 ? x : 0
     @test eltype(mappedarray(_zero, [1, 1.0])) == Union{Float64,Int}
     @test eltype(mappedarray(_zero, [1.0, 1])) == Union{Float64,Int}
@@ -199,4 +198,11 @@ end
     @test eltype(mappedarray(_zero, identity, [1, 1.0])) == Union{Float64,Int}
     @test eltype(mappedarray(_zero, identity, [1.0, 1])) == Union{Float64,Int}
     @test eltype(mappedarray(_zero, identity, [1, 1])) == Int
+
+    # MultiMappedArray and ReadonlyMultiMappedArray
+    _sum(x, y) = _zero(x) + _zero(y)
+    @test eltype(mappedarray(_sum, [1, 1.0], [1.0, missing])) == Union{Missing, Float64, Int64}
+    @test eltype(mappedarray(_sum, [1, 1], [2, 2])) == Int
+    @test eltype(mappedarray(_sum, identity, [1, 1.0], [1.0, missing])) == Union{Missing, Float64, Int64}
+    @test eltype(mappedarray(_sum, identity, [1, 1], [2, 2])) == Int
 end
