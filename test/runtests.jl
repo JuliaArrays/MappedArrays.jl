@@ -177,3 +177,19 @@ end
     str = String(take!(io))
     @test occursin("x1 + x2", str)
 end
+
+@testset "eltype (issue #32)" begin
+    # Tests fix for
+    # https://github.com/JuliaArrays/MappedArrays.jl/issues/32#issuecomment-682985419
+    T = Union{Missing, Float32}
+    @test eltype(of_eltype(T, [missing, 3])) == T
+    @test eltype(of_eltype(T, [3, missing])) == T
+    @test eltype(of_eltype(Union{Missing, Float64}, [1, 2])) == Float64
+
+    # Based on
+    # https://github.com/JuliaArrays/MappedArrays.jl/pull/34#issuecomment-706265722
+    _zero(x) = x > 0 ? x : 0
+    @test eltype(mappedarray(_zero, [1, 1.0])) == Union{Float64,Int}
+    @test eltype(mappedarray(_zero, [1.0, 1])) == Union{Float64,Int}
+    @test eltype(mappedarray(_zero, [1, 1])) == Int
+end
