@@ -186,10 +186,17 @@ end
     @test eltype(of_eltype(T, [3, missing])) == T
     @test eltype(of_eltype(Union{Missing, Float64}, [1, 2])) == Float64
 
+    @test eltype(mappedarray(identity, [1, missing])) == Union{Missing, Int}
+    @test eltype(mappedarray(identity, [missing, 1])) == Union{Missing, Int}
+
     # Based on
     # https://github.com/JuliaArrays/MappedArrays.jl/pull/34#issuecomment-706265722
     _zero(x) = x > 0 ? x : 0
     @test eltype(mappedarray(_zero, [1, 1.0])) == Union{Float64,Int}
     @test eltype(mappedarray(_zero, [1.0, 1])) == Union{Float64,Int}
     @test eltype(mappedarray(_zero, [1, 1])) == Int
+
+    @test eltype(mappedarray(_zero, identity, [1, 1.0])) == Union{Float64,Int}
+    @test eltype(mappedarray(_zero, identity, [1.0, 1])) == Union{Float64,Int}
+    @test eltype(mappedarray(_zero, identity, [1, 1])) == Int
 end
