@@ -3,7 +3,7 @@ using Test
 
 @test isempty(detect_ambiguities(MappedArrays, Base, Core))
 
-using FixedPointNumbers, OffsetArrays, ColorTypes
+using FixedPointNumbers, OffsetArrays, Colors
 
 @testset "ReadonlyMappedArray" begin
     a = [1,4,9,16]
@@ -213,4 +213,9 @@ end
     @test eltype(mappedarray(_maybe_int, Float64, [1, -1])) == Int64
     @test eltype(mappedarray(Float64, _maybe_int, [1.0, 1, -1, -1.0])) == Float64
     @test eltype(mappedarray(Float64, _maybe_int, [1, -1])) == Float64
+
+    X = rand(Lab{Float32}, 4, 4)
+    @test eltype(of_eltype(RGB{Float32}, X)) == RGB{Float32}
+    X = Any[1, 2, 3]
+    @test eltype(of_eltype(Int, X)) == Int
 end
