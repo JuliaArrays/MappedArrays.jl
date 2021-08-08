@@ -58,7 +58,8 @@ not set them).
 When multiple input arrays are supplied, `M[i] = f(A[i], B[i], C[i]...)`.
 """
 function mappedarray(f, data::AbstractArray)
-    T = Base._return_type(f, eltypes(data))
+    infer_eltype() = Base._return_type(f, eltypes(data))
+    T = infer_eltype()
     ReadonlyMappedArray{T,ndims(data),typeof(data),typeof(f)}(f, data)
 end
 
@@ -67,7 +68,8 @@ function mappedarray(::Type{T}, data::AbstractArray) where T
 end
 
 function mappedarray(f, data::AbstractArray...)
-    T = Base._return_type(f, eltypes(data))
+    infer_eltype() = Base._return_type(f, eltypes(data))
+    T = infer_eltype()
     ReadonlyMultiMappedArray{T,ndims(first(data)),typeof(data),typeof(f)}(f, data)
 end
 
@@ -86,12 +88,14 @@ the view and, correspondingly, the values in `A`.
 When multiple input arrays are supplied, `M[i] = f(A[i], B[i], C[i]...)`.
 """
 function mappedarray(f, finv, data::AbstractArray)
-    T = Base._return_type(f, eltypes(data))
+    infer_eltype() = Base._return_type(f, eltypes(data))
+    T = infer_eltype()
     MappedArray{T,ndims(data),typeof(data),typeof(f),typeof(finv)}(f, finv, data)
 end
 
 function mappedarray(f, finv, data::AbstractArray...)
-    T = Base._return_type(f, eltypes(data))
+    infer_eltype() = Base._return_type(f, eltypes(data))
+    T = infer_eltype()
     MultiMappedArray{T,ndims(first(data)),typeof(data),typeof(f),typeof(finv)}(f, finv, data)
 end
 
@@ -99,7 +103,8 @@ function mappedarray(::Type{T}, finv, data::AbstractArray...) where T
     MultiMappedArray{T,ndims(first(data)),typeof(data),Type{T},typeof(finv)}(T, finv, data)
 end
 function mappedarray(f, ::Type{Finv}, data::AbstractArray...) where Finv
-    T = Base._return_type(f, eltypes(data))
+    infer_eltype() = Base._return_type(f, eltypes(data))
+    T = infer_eltype()
     MultiMappedArray{T,ndims(first(data)),typeof(data),typeof(f),Type{Finv}}(f, Finv, data)
 end
 
@@ -113,7 +118,7 @@ end
 
 creates a view of `A` that lazily-converts the element type to `T`.
 """
-of_eltype(::Type{T}, data::AbstractArray{S}) where {S,T} = mappedarray(x->convert(T,x), y->convert(S,y), data)
+of_eltype(::Type{T}, data::AbstractArray{S}) where {S,T} = mappedarray(x->convert(T,x)::T, y->convert(S,y)::S, data)
 of_eltype(::Type{T}, data::AbstractArray{T}) where {T} = data
 of_eltype(::T, data::AbstractArray{S}) where {S,T} = of_eltype(T, data)
 
