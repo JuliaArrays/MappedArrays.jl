@@ -261,7 +261,7 @@ function func_print(io, f, types)
 end
 
 eltypes(A::AbstractArray) = Tuple{eltype(A)}
-@Base.pure eltypes(A::Tuple{Vararg{<:AbstractArray}}) = Tuple{(eltype.(A))...}
+@Base.pure eltypes(A::Tuple{Vararg{AbstractArray}}) = Tuple{(eltype.(A))...}
 
 ## Deprecations
 @deprecate mappedarray(f_finv::Tuple{Any,Any}, args::AbstractArray...) mappedarray(f_finv[1], f_finv[2], args...)
