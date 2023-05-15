@@ -16,7 +16,11 @@ using FixedPointNumbers, OffsetArrays, Colors
     @test b[2] == 2
     @test b[3] == 3
     @test b[4] == 4
-    @test_throws ErrorException b[3] = 0
+    if isdefined(Base, :CanonicalIndexError)
+        @test_throws CanonicalIndexError b[3] = 0
+    else
+        @test_throws ErrorException b[3] = 0
+    end
     @test isa(eachindex(b), AbstractUnitRange)
     b = mappedarray(sqrt, a')
     @test isa(eachindex(b), AbstractUnitRange)
@@ -201,7 +205,7 @@ end
 
     # MultiMappedArray and ReadonlyMultiMappedArray
     _sum(x, y) = _zero(x) + _zero(y)
-    inferred_type = VERSION >= v"1.6.0-RC1" ? Union{Missing, Float64, Int64} : Any
+    inferred_type = Union{Missing, Float64, Int64}
     @test eltype(mappedarray(_sum, [1, 1.0], [1.0, missing])) == inferred_type
     @test eltype(mappedarray(_sum, [1, 1], [2, 2])) == Int
     @test eltype(mappedarray(_sum, identity, [1, 1.0], [1.0, missing])) == inferred_type
