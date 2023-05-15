@@ -194,7 +194,8 @@ end
     @test eltype(mappedarray(identity, [missing, 1])) == Union{Missing, Int}
 
     # ReadonlyMappedArray and MappedArray
-    _zero(x) = x > 0 ? x : 0
+    _zero(x) = x === missing ? missing :
+               x > 0 ? x : 0
     @test eltype(mappedarray(_zero, [1, 1.0])) == Union{Float64,Int}
     @test eltype(mappedarray(_zero, [1.0, 1])) == Union{Float64,Int}
     @test eltype(mappedarray(_zero, [1, 1])) == Int
