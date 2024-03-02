@@ -4,6 +4,10 @@ using Base: @propagate_inbounds
 
 export AbstractMappedArray, MappedArray, ReadonlyMappedArray, mappedarray, of_eltype
 
+using Reexport
+include("ProductedArrays.jl")
+@reexport using .ProductedArrays
+
 abstract type AbstractMappedArray{T,N} <: AbstractArray{T,N} end
 abstract type AbstractMultiMappedArray{T,N} <: AbstractMappedArray{T,N} end
 
