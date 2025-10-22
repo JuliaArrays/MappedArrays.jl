@@ -226,38 +226,79 @@ function Base.showarg(io::IO, A::AbstractMappedArray{T,N}, toplevel=false) where
     toplevel && print(io, " with eltype ", T)
 end
 
-function func_print(io, f, types)
-    ft = typeof(f)
-    mt = ft.name.mt
-    name = string(mt.name)
-    if startswith(name, '#')
-        # This is an anonymous function. See if it can be printed nicely
-        lwrds = code_lowered(f, types)
-        if length(lwrds) != 1
-            show(io, f)
-            return nothing
-        end
-        lwrd = lwrds[1]
-        c = lwrd.code
-        if length(c) == 2 && ((isa(c[2], Expr) && c[2].head === :return) || (isdefined(Core, :ReturnNode) && isa(c[2], Core.ReturnNode)))
-            # This is a single-line anonymous function, we should handle it
-            s = lwrd.slotnames[2:end]
-            if length(s) == 1
-                print(io, s[1], "->")
+@static if VERSION >= v"1.12.0"
+    # for Julia 1.12 and later
+
+    function func_print(io, f, types)
+        ft = typeof(f)
+        name = string(Base.nameof(ft))
+        if startswith(name, '#')
+            # This is an anonymous function. See if it can be printed nicely
+            lwrds = code_lowered(f, types)
+            if length(lwrds) != 1
+                show(io, f)
+                return nothing
+            end
+            lwrd = lwrds[1]
+            c = lwrd.code
+            if length(c) == 2 && ((isa(c[2], Expr) && c[2].head === :return) || (isdefined(Core, :ReturnNode) && isa(c[2], Core.ReturnNode)))
+                # This is a single-line anonymous function, we should handle it
+                s = lwrd.slotnames[2:end]
+                if length(s) == 1
+                    print(io, s[1], "->")
+                else
+                    print(io, tuple(s...), "->")
+                end
+                c1 = string(c[1])
+                for i = 1:length(s)
+                    c1 = replace(c1, "_"*string(i+1)=>string(s[i]))
+                end
+                print(io, c1)
             else
-                print(io, tuple(s...), "->")
+                show(io, f)
             end
-            c1 = string(c[1])
-            for i = 1:length(s)
-                c1 = replace(c1, "_"*string(i+1)=>string(s[i]))
-            end
-            print(io, c1)
         else
             show(io, f)
         end
-    else
-        show(io, f)
     end
+
+else
+    # for Julia pre-1.12
+
+    function func_print(io, f, types)
+        ft = typeof(f)
+        mt = ft.name.mt
+        name = string(mt.name)
+        if startswith(name, '#')
+            # This is an anonymous function. See if it can be printed nicely
+            lwrds = code_lowered(f, types)
+            if length(lwrds) != 1
+                show(io, f)
+                return nothing
+            end
+            lwrd = lwrds[1]
+            c = lwrd.code
+            if length(c) == 2 && ((isa(c[2], Expr) && c[2].head === :return) || (isdefined(Core, :ReturnNode) && isa(c[2], Core.ReturnNode)))
+                # This is a single-line anonymous function, we should handle it
+                s = lwrd.slotnames[2:end]
+                if length(s) == 1
+                    print(io, s[1], "->")
+                else
+                    print(io, tuple(s...), "->")
+                end
+                c1 = string(c[1])
+                for i = 1:length(s)
+                    c1 = replace(c1, "_"*string(i+1)=>string(s[i]))
+                end
+                print(io, c1)
+            else
+                show(io, f)
+            end
+        else
+            show(io, f)
+        end
+    end
+
 end
 
 eltypes(A::AbstractArray) = Tuple{eltype(A)}
