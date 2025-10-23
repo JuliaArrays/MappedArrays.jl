@@ -173,13 +173,21 @@ end
     b = mappedarray(sqrt, a)
     @test summary(b) == "4-element mappedarray(sqrt, ::$(Vector{Int})) with eltype Float64"
     c = mappedarray(sqrt, x->x*x, a)
-    @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::$(Vector{Int})) with eltype Float64"
+    if VERSION >= v"1.12.0"
+        @test summary(c) == "4-element mappedarray(sqrt, var\"#21#22\"(), ::$(Vector{Int})) with eltype Float64"
+    else
+        @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::$(Vector{Int})) with eltype Float64"
+    end
     # issue #26
     M = @inferred mappedarray((x1,x2)->x1+x2, a, a)
     io = IOBuffer()
     show(io, MIME("text/plain"), M)
     str = String(take!(io))
-    @test occursin("x1 + x2", str)
+    if VERSION >= v"1.12.0"
+        @test occursin("var\"#23#24\"()", str)
+    else
+        @test occursin("x1 + x2", str)
+    end
 end
 
 @testset "eltype (issue #32)" begin
