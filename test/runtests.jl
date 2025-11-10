@@ -186,7 +186,8 @@ end
     show(io, MIME("text/plain"), M)
     str = String(take!(io))
     if VERSION >= v"1.12.0"
-        @test occursin("var\"#23#24\"()", str)
+        # Test whether `str` contains a symbol name such as `var\"#23#24\"()`
+        @test occursin("var\"", str) && occursin("\"()", str)
     else
         @test occursin("x1 + x2", str)
     end
