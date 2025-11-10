@@ -174,7 +174,9 @@ end
     @test summary(b) == "4-element mappedarray(sqrt, ::$(Vector{Int})) with eltype Float64"
     c = mappedarray(sqrt, x->x*x, a)
     if VERSION >= v"1.12.0"
-        @test summary(c) == "4-element mappedarray(sqrt, var\"#21#22\"(), ::$(Vector{Int})) with eltype Float64"
+        # Note: `[A-Za-z0-9_\"#]+` matches Julia symbols, including the special `var\"#21#22\"` syntax
+        summary_c = replace(summary(c), r"var\".*\"" => "var")
+        @test summary_c == "4-element mappedarray(sqrt, var(), ::$(Vector{Int})) with eltype Float64"
     else
         @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::$(Vector{Int})) with eltype Float64"
     end
