@@ -173,13 +173,24 @@ end
     b = mappedarray(sqrt, a)
     @test summary(b) == "4-element mappedarray(sqrt, ::$(Vector{Int})) with eltype Float64"
     c = mappedarray(sqrt, x->x*x, a)
-    @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::$(Vector{Int})) with eltype Float64"
+    if VERSION >= v"1.12.0"
+        # Note: `[A-Za-z0-9_\"#]+` matches Julia symbols, including the special `var\"#21#22\"` syntax
+        summary_c = replace(summary(c), r"var\".*\"" => "var")
+        @test summary_c == "4-element mappedarray(sqrt, var(), ::$(Vector{Int})) with eltype Float64"
+    else
+        @test summary(c) == "4-element mappedarray(sqrt, x->x * x, ::$(Vector{Int})) with eltype Float64"
+    end
     # issue #26
     M = @inferred mappedarray((x1,x2)->x1+x2, a, a)
     io = IOBuffer()
     show(io, MIME("text/plain"), M)
     str = String(take!(io))
-    @test occursin("x1 + x2", str)
+    if VERSION >= v"1.12.0"
+        # Test whether `str` contains a symbol name such as `var\"#23#24\"()`
+        @test occursin("var\"", str) && occursin("\"()", str)
+    else
+        @test occursin("x1 + x2", str)
+    end
 end
 
 @testset "eltype (issue #32)" begin
