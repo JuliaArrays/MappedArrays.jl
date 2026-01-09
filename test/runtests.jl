@@ -235,3 +235,25 @@ end
     X = Any[1, 2, 3]
     @test eltype(of_eltype(Int, X)) == Int
 end
+
+@testset "mapreduce" begin
+    for T in [Int, Float64]
+        x = rand(T, 10); y = similar(x);
+
+        f = x->x^2; op = +
+        @test mapreduce(f, op, x) == mappedarrayreduce(f, op, x)
+        @test mapreduce(f, op, x, init = zero(T)) == mappedarrayreduce(f, op, x, init = zero(T))
+        @test mapreduce(f, op, x, init = zero(T), dims = 1) == mappedarrayreduce(f, op, x, init = zero(T), dims = 1)
+        @test mapreduce(f, op, x, init = zero(T), dims = :) == mappedarrayreduce(f, op, x, init = zero(T), dims = :)
+
+        @test_throws Exception mappedarrayreduce(x->x^2, sqrt, op, x)
+
+        if VERSION >= v"1.2"
+            f = ==; op = +
+            @test mapreduce(f, op, x, y) == mappedarrayreduce(f, op, x, y)
+            @test mapreduce(f, op, x, y, init = 0) == mappedarrayreduce(f, op, x, y, init = 0)
+            @test mapreduce(f, op, x, y, init = 0, dims = 1) == mappedarrayreduce(f, op, x, y, init = 0, dims = 1)
+            @test mapreduce(f, op, x, y, init = 0, dims = :) == mappedarrayreduce(f, op, x, y, init = 0, dims = :)
+        end
+    end
+end
